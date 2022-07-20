@@ -1,0 +1,333 @@
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Data.SqlClient;
+using System.Drawing;
+using System.Configuration;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using System.IO;
+
+namespace FinalProjectAssignment
+{
+    public partial class CustomerPage : Form
+    {
+
+      //  Form1 Form1 = new Form1();
+        public CustomerPage()
+        {
+            InitializeComponent();
+            btnUpdate.Enabled = false;
+            btnDelete.Enabled = false;
+        }
+        // variable 
+        SqlDataReader reader;
+        private string Gender = "";
+
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            //LoadForms(new DamiinPage());
+            DamiinPage damiinPage = new DamiinPage();
+            damiinPage.Show();
+        }
+
+
+
+
+        // Method to clear Cells
+        public void Clear()
+        {
+            cmbEmployeeID.Text = "";
+            txtCustomerID.Text = "";
+            txtFirstName.Text = "";
+            txtLastName.Text = "";
+            txtAddress.Text = "";
+            txtTellephone.Text = "";
+            txtEmail.Text = "";
+            txtAge.Text = "";
+            CustomerPictureBox.Image = null;
+        }
+
+        // Method to insert data to database 
+        public void Insert(string ImageLocation, byte[] Picture)
+        {
+            using (SqlConnection conn = new SqlConnection(ConfigurationManager.ConnectionStrings["FinalProjectSemesterFour.Properties.Settings.FinalProjectSemesterFourConnectionString"].ConnectionString))
+            {
+                conn.Open();
+                using (SqlCommand cmd = new SqlCommand("insert into CustomerTable(CustomerID, EmployeeID, Gender, Age, PhoneNumber, FirstName, LastName, CustomerPhoto,Email, CustomerAddress, CustomerImageLocation) Values(@CustomerID, @EmployeeID, @Gender, @Age, @PhoneNumber, @FirstName, @LastName, @CustomerPhoto,@Email, @CustomerAddress, @CustomerImageLocation)", conn))
+                {
+                    cmd.CommandType = CommandType.Text;
+                    cmd.Parameters.AddWithValue("@CustomerID", txtCustomerID.Text);
+                    cmd.Parameters.AddWithValue("@EmployeeID", cmbEmployeeID.Text);
+                    string gender;
+                    if (rbtnMale.Checked)
+                    {
+                        gender = "Male";
+                    }
+                    else
+                    {
+                        gender = "Female";
+                    }
+                    cmd.Parameters.AddWithValue("@Gender", gender);
+                    cmd.Parameters.AddWithValue("@Age", txtAge.Text);
+                    cmd.Parameters.AddWithValue("@PhoneNumber", txtTellephone.Text);
+                    cmd.Parameters.AddWithValue("@FirstName", txtFirstName.Text);
+                    cmd.Parameters.AddWithValue("@LastName", txtLastName.Text);
+                    cmd.Parameters.AddWithValue("@CustomerPhoto", Picture);
+                    cmd.Parameters.AddWithValue("@Email", txtEmail.Text);
+                    cmd.Parameters.AddWithValue("@CustomerAddress", txtAddress.Text);
+                    cmd.Parameters.AddWithValue("@CustomerImageLocation", txtImageLocation.Text);
+                    cmd.ExecuteNonQuery();
+                }
+                conn.Close();
+            }
+        }
+
+        // method to display data from database int0 datagridview
+        public void LoadData()
+        {
+            using (SqlConnection conn = new SqlConnection(ConfigurationManager.ConnectionStrings["FinalProjectSemesterFour.Properties.Settings.FinalProjectSemesterFourConnectionString"].ConnectionString))
+            {
+                conn.Open();
+                using (DataTable dt = new DataTable("CustomerTable"))
+                {
+                    SqlDataAdapter adapter = new SqlDataAdapter("select * from CustomerTable", conn);
+                    adapter.Fill(dt);
+                    dataGridView1.DataSource = dt;
+                }
+                conn.Close();
+            }
+        }
+
+        // method to convert image
+        byte[] ConvertImageToBytes(Image Picture)
+        {
+            using (MemoryStream ms = new MemoryStream())
+            {
+                Picture.Save(ms, System.Drawing.Imaging.ImageFormat.Png);
+                return ms.ToArray();
+            }
+        }
+
+        // anothrer method related to coverting image
+        public Image ConvertByteArrayToImage(byte[] data)
+        {
+            using (MemoryStream ms = new MemoryStream(data))
+            {
+                return Image.FromStream(ms);
+            }
+        }
+
+
+        private void CustomerPage_Load(object sender, EventArgs e)
+        {
+            // TODO: This line of code loads data into the 'finalProjectSemesterFourDataSet.CustomerTable' table. You can move, or remove it, as needed.
+            this.customerTableTableAdapter.Fill(this.finalProjectSemesterFourDataSet.CustomerTable);
+            // TODO: This line of code loads data into the 'finalProjectSemesterFourDataSet.CustomerTable' table. You can move, or remove it, as needed.
+            this.customerTableTableAdapter.Fill(this.finalProjectSemesterFourDataSet.CustomerTable);
+            LoadData();
+        }
+
+        // mehtod to update data
+        public void UpdateData(string ImageLocation, byte[] Picture)
+        {
+            using (SqlConnection conn = new SqlConnection(ConfigurationManager.ConnectionStrings["FinalProjectSemesterFour.Properties.Settings.FinalProjectSemesterFourConnectionString"].ConnectionString))
+            {
+                conn.Open();
+                SqlCommand cmd = conn.CreateCommand();
+                cmd.CommandType = CommandType.Text;
+                cmd.CommandText = "Update CustomerTable set CustomerID=@CustomerID, FirstName=@FirstName, Gender=@Gender, Age=@Age, PhoneNumber=@PhoneNumber, CustomerAddress=@CustomerAddress, CustomerImageLocation=@CustomerImageLocation, CustomerPhoto=@CustomerPhoto, LastName=@LastName, Email=@Email WHERE CustomerID=@CustomerID";
+                cmd.Parameters.AddWithValue("@CustomerID", txtCustomerID.Text);
+                cmd.Parameters.AddWithValue("@EmployeeID", cmbEmployeeID.Text);
+                string gender;
+                if (rbtnMale.Checked)
+                {
+                    gender = "Male";
+                }
+                else
+                {
+                    gender = "Female";
+                }
+                cmd.Parameters.AddWithValue("@Gender", gender);
+                cmd.Parameters.AddWithValue("@Age", txtAge.Text);
+                cmd.Parameters.AddWithValue("@PhoneNumber", txtTellephone.Text);
+                cmd.Parameters.AddWithValue("@FirstName", txtFirstName.Text);
+                cmd.Parameters.AddWithValue("@LastName", txtLastName.Text);
+                cmd.Parameters.AddWithValue("@CustomerPhoto", Picture);
+                cmd.Parameters.AddWithValue("@Email", txtEmail.Text);
+                cmd.Parameters.AddWithValue("@CustomerAddress", txtAddress.Text);
+                cmd.Parameters.AddWithValue("@CustomerImageLocation", txtImageLocation.Text);
+                cmd.ExecuteNonQuery();
+                conn.Close();
+            }
+
+        }
+
+        private void button2_Click_1(object sender, EventArgs e)
+        {
+            //LoadForms(new DamiinPage());
+            DamiinPage damiinPage = new DamiinPage();
+            damiinPage.Show();
+        }
+
+        private void btnsearch_Click_1(object sender, EventArgs e)
+        {
+            using (SqlConnection conn = new SqlConnection(ConfigurationManager.ConnectionStrings["FinalProjectSemesterFour.Properties.Settings.FinalProjectSemesterFourConnectionString"].ConnectionString))
+            {
+                conn.Open();
+                SqlDataAdapter adapter = new SqlDataAdapter("select * from CustomerTable where CustomerID= '" + txtsearchbox.Text + "' ", conn);
+                DataTable dt = new DataTable();
+                adapter.Fill(dt);
+                dataGridView1.DataSource = dt;
+                conn.Close();
+
+                txtsearchbox.Text = "";
+            }
+        }
+
+        private void button3_Click_1(object sender, EventArgs e)
+        {
+            using (OpenFileDialog ofd = new OpenFileDialog()
+            {
+                Filter = "Image Files(*.jpg;*.png)|*.jpg;*.png",
+                Multiselect = false
+
+            })
+            {
+                if (ofd.ShowDialog() == DialogResult.OK)
+                {
+                    CustomerPictureBox.Image = Image.FromFile(ofd.FileName);
+                    txtImageLocation.Text = ofd.FileName;
+                }
+            }
+        }
+
+        private void dataGridView1_CellClick_1(object sender, DataGridViewCellEventArgs e)
+        {
+            DataTable dt = dataGridView1.DataSource as DataTable;
+            if (dt != null)
+            {
+                DataRow row = dt.Rows[e.RowIndex];
+                txtCustomerID.Text = row["CustomerID"].ToString();
+                cmbEmployeeID.Text = row["EmployeeID"].ToString();
+                txtFirstName.Text = row["FirstName"].ToString();
+                txtLastName.Text = row["LastName"].ToString();
+                string gender = row["Gender"].ToString();
+                if (gender == "Male")
+                {
+                    rbtnMale.Checked = true;
+                }
+                else
+                {
+                    rbtnFemale.Checked = true;
+                }
+                txtAge.Text = row["Age"].ToString();
+                txtTellephone.Text = row["PhoneNumber"].ToString();
+                txtAddress.Text = row["CustomerAddress"].ToString();
+                txtEmail.Text = row["Email"].ToString();
+                CustomerPictureBox.Image = ConvertByteArrayToImage((byte[])row["CustomerPhoto"]);
+                txtImageLocation.Text = row["CustomerImageLocation"].ToString();
+            }
+            btnUpdate.Enabled = true;
+            btnDelete.Enabled = true;
+        }
+
+        private void button1_Click_1(object sender, EventArgs e)
+        {
+            if (rbtnMale.Checked)
+                Gender = "Male";
+            if (rbtnFemale.Checked)
+                Gender = "Female";
+
+            ReportPage reportPage = new ReportPage();
+            CustomerRentCarPage ccc = new CustomerRentCarPage();
+            ccc.CCRP();
+            reportPage.Employeeid = cmbEmployeeID.Text;
+            reportPage.Customerid = txtCustomerID.Text;
+            reportPage.firstname = txtFirstName.Text;
+            reportPage.lastNames = txtLastName.Text;
+            reportPage.age = txtAge.Text;
+            reportPage.phonenumber = txtTellephone.Text;
+            reportPage.address = txtAddress.Text;
+            reportPage.img = CustomerPictureBox.Image;
+            reportPage.ShowDialog();
+        }
+
+       
+        
+
+        private void btnDelete_Click_1(object sender, EventArgs e)
+        {
+            using (SqlConnection conn = new SqlConnection(ConfigurationManager.ConnectionStrings["FinalProjectSemesterFour.Properties.Settings.FinalProjectSemesterFourConnectionString"].ConnectionString))
+            {
+                conn.Open();
+                SqlCommand cmd = conn.CreateCommand();
+                cmd.CommandType = CommandType.Text;
+                cmd.CommandText = "delete from CustomerTable where CustomerID = '" + txtCustomerID.Text + "'";
+                cmd.ExecuteNonQuery();
+                conn.Close();
+                LoadData();
+                Clear();
+                MessageBox.Show("Deleted...");
+            }
+        }
+
+        private void btnUpdate_Click_1(object sender, EventArgs e)
+        {
+            using (SqlConnection conn = new SqlConnection(ConfigurationManager.ConnectionStrings["FinalProjectSemesterFour.Properties.Settings.FinalProjectSemesterFourConnectionString"].ConnectionString))
+            {
+                conn.Open();
+                if (cmbEmployeeID.Text == "" || txtFirstName.Text == "" || txtAge.Text == "" || txtAddress.Text == "" || txtTellephone.Text == "" || CustomerPictureBox.Image == null || txtImageLocation.Text == "" || txtEmail.Text == "" || txtLastName.Text == "")
+                {
+                    MessageBox.Show("Please fill the blank space.");
+                }
+                else
+                {
+                    UpdateData(txtImageLocation.Text, ConvertImageToBytes(CustomerPictureBox.Image));
+                    MessageBox.Show("Updated...");
+                    Clear();
+                    LoadData();
+                }
+            }
+        }
+
+        private void btnSave_Click_1(object sender, EventArgs e)
+        {
+            using (SqlConnection conn = new SqlConnection(ConfigurationManager.ConnectionStrings["FinalProjectSemesterFour.Properties.Settings.FinalProjectSemesterFourConnectionString"].ConnectionString))
+            {
+                conn.Open();
+                SqlCommand sqlCommand = conn.CreateCommand();
+                sqlCommand.CommandType = CommandType.Text;
+                sqlCommand.CommandText = "select * from CustomerTable where CustomerID = '" + txtCustomerID.Text.Trim() + "'";
+                reader = sqlCommand.ExecuteReader();
+
+                if (reader.Read())
+                {
+                    MessageBox.Show("Customer Already Exist.");
+                }
+                else if (txtCustomerID.Text == "" || cmbEmployeeID.Text == "" || txtFirstName.Text == "" || txtAge.Text == "" || txtAddress.Text == "" || txtTellephone.Text == "" || CustomerPictureBox.Image == null || txtImageLocation.Text == "" || txtEmail.Text == "" || txtLastName.Text == "")
+                {
+                    MessageBox.Show("Please fill the blank space.");
+                }
+                else
+                {
+                    Insert(txtImageLocation.Text, ConvertImageToBytes(CustomerPictureBox.Image));
+                    MessageBox.Show("Saved...");
+                    // clear();
+                    LoadData();
+                }
+
+            }
+        }
+
+        private void cmbEmployeeID_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            
+        }
+    }
+
+}
